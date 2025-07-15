@@ -1,30 +1,3 @@
-// import React from 'react';
-// import { Link } from 'react-router-dom';
-
-// const Sidebar = () => {
-//   return (
-//     <aside
-//       style={{ width: '200px', padding: '1rem', borderRight: '1px solid #ccc' }}
-//     >
-//       <ul style={{ listStyle: 'none', padding: 0 }}>
-//         <li>
-//           <Link to='/'>Dashboard</Link>
-//         </li>
-//         <li>
-//           <Link to='/tasks'>Tasks</Link>
-//         </li>
-//         <li>
-//           <Link to='/pomodoro'>Pomodoro</Link>
-//         </li>
-//         <li>
-//           <Link to='/github'>GitHub Stats</Link>
-//         </li>
-//       </ul>
-//     </aside>
-//   );
-// };
-
-// export default Sidebar;
 import * as React from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -32,7 +5,6 @@ import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
-import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -43,8 +15,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import TimerIcon from '@mui/icons-material/Timer';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 const drawerWidth = 240;
 
@@ -126,43 +102,48 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
-export default function MiniDrawer() {
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+const icons = [
+  <DashboardIcon />,
+  <FormatListBulletedIcon />,
+  <TimerIcon />,
+  <QueryStatsIcon />,
+];
 
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+export default function Sidebar({ open, setOpen }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+
+  console.log(location);
 
   return (
     <>
-      <AppBar position='fixed'>
-        <Toolbar>
-          <IconButton
-            color='inherit'
-            aria-label='open drawer'
-            onClick={() => setOpen(!open)}
-            edge='start'
-            sx={[
-              {
-                marginRight: 5,
-              },
-            ]}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant='h5' component='div' sx={{ flexGrow: 1 }}>
-            <span style={{ color: '#0b1957', fontWeight: 600 }}>Dev</span>
-            Insight
-          </Typography>
-        </Toolbar>
-      </AppBar>
       <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-
+        <AppBar position='fixed'>
+          <Toolbar>
+            <IconButton
+              color='inherit'
+              aria-label='open drawer'
+              onClick={() => setOpen(!open)}
+              edge='start'
+              sx={[
+                {
+                  marginRight: 5,
+                },
+              ]}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant='h5' component='div' sx={{ flexGrow: 1 }}>
+              <span style={{ color: '#0b1957', fontWeight: 600 }}>Dev</span>
+              Insight
+            </Typography>
+            <Button color='inherit'>Login</Button>
+          </Toolbar>
+        </AppBar>
         <Drawer variant='permanent' open={open}>
           <DrawerHeader>
-            <IconButton onClick={handleDrawerClose}>
+            <IconButton onClick={() => setOpen(!open)}>
               {theme.direction === 'rtl' ? (
                 <ChevronRightIcon />
               ) : (
@@ -172,8 +153,23 @@ export default function MiniDrawer() {
           </DrawerHeader>
           <Divider />
           <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-              <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+            {[
+              { text: 'Dashboard', key: '/' },
+              { text: 'Tasks', key: '/tasks' },
+              { text: 'Pomodoro', key: '/pomodoro' },
+              { text: 'Stats', key: '/github' },
+            ].map((item, index) => (
+              <ListItem
+                key={item.text}
+                disablePadding
+                sx={{
+                  display: 'block',
+                  backgroundColor:
+                    location.pathname === item.key ? '#d5ebfec7' : null,
+                  transition: '0.3s ease-in-out',
+                }}
+                onClick={() => navigate(`${item.key}`)}
+              >
                 <ListItemButton
                   sx={[
                     {
@@ -204,62 +200,10 @@ export default function MiniDrawer() {
                           },
                     ]}
                   >
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                    {icons[index]}
                   </ListItemIcon>
                   <ListItemText
-                    primary={text}
-                    sx={[
-                      open
-                        ? {
-                            opacity: 1,
-                          }
-                        : {
-                            opacity: 0,
-                          },
-                    ]}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
-              <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton
-                  sx={[
-                    {
-                      minHeight: 48,
-                      px: 2.5,
-                    },
-                    open
-                      ? {
-                          justifyContent: 'initial',
-                        }
-                      : {
-                          justifyContent: 'center',
-                        },
-                  ]}
-                >
-                  <ListItemIcon
-                    sx={[
-                      {
-                        minWidth: 0,
-                        justifyContent: 'center',
-                      },
-                      open
-                        ? {
-                            mr: 3,
-                          }
-                        : {
-                            mr: 'auto',
-                          },
-                    ]}
-                  >
-                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={text}
+                    primary={item.text}
                     sx={[
                       open
                         ? {
@@ -275,7 +219,9 @@ export default function MiniDrawer() {
             ))}
           </List>
         </Drawer>
-        <Box component='main' sx={{ flexGrow: 1, p: 3 }}></Box>
+        <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
+          <Outlet />
+        </Box>
       </Box>
     </>
   );
