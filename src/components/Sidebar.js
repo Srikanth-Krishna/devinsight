@@ -14,6 +14,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
@@ -21,6 +23,9 @@ import TimerIcon from '@mui/icons-material/Timer';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import GitHubSearchModal from './SearchModal';
+import { useGlobalState } from '../context/GlobalState';
+import { ColorModeContext } from '../AppWrapper';
 
 const drawerWidth = 240;
 
@@ -50,7 +55,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'flex-end',
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
 
@@ -113,8 +117,31 @@ export default function Sidebar({ open, setOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const colorMode = React.useContext(ColorModeContext);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const { dispatch } = useGlobalState();
 
-  console.log(location);
+  const searchHandler = async (user) => {
+    const headers = {
+      Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+    };
+
+    const userRes = await fetch(`https://api.github.com/users/${user}`, {
+      headers,
+    });
+    if (!userRes.ok) throw new Error('User not found');
+    const userData = await userRes.json();
+
+    const repoRes = await fetch(
+      `https://api.github.com/users/${user}/repos?per_page=100`,
+      { headers }
+    );
+    const repoData = await repoRes.json();
+
+    dispatch({ type: 'SET_GITHUB_USER', payload: userData });
+    dispatch({ type: 'SET_GITHUB_REPOS', payload: repoData });
+    navigate('/github');
+  };
 
   return (
     <>
@@ -138,9 +165,23 @@ export default function Sidebar({ open, setOpen }) {
               <span style={{ color: '#0b1957', fontWeight: 600 }}>Dev</span>
               Insight
             </Typography>
-            <Button color='inherit'>Login</Button>
+            <IconButton color='inherit' onClick={colorMode.toggleColorMode}>
+              {theme.palette.mode === 'dark' ? (
+                <LightModeIcon />
+              ) : (
+                <DarkModeIcon />
+              )}
+            </IconButton>
+            <Button color='inherit' onClick={() => setSearchOpen(true)}>
+              Search User
+            </Button>
           </Toolbar>
         </AppBar>
+        <GitHubSearchModal
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          onSearch={(username) => searchHandler(username)}
+        />
         <Drawer variant='permanent' open={open}>
           <DrawerHeader>
             <IconButton onClick={() => setOpen(!open)}>
@@ -155,7 +196,7 @@ export default function Sidebar({ open, setOpen }) {
           <List>
             {[
               { text: 'Dashboard', key: '/' },
-              { text: 'Tasks', key: '/tasks' },
+              { text: 'Task Manager', key: '/tasks' },
               { text: 'Pomodoro', key: '/pomodoro' },
               { text: 'Stats', key: '/github' },
             ].map((item, index) => (

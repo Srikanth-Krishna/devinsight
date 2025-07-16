@@ -2,167 +2,106 @@ import Container from '@mui/material/Container';
 import Fade from '@mui/material/Fade';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import React, { useEffect, useState } from 'react';
-import { CardStat } from '../components/CardStat';
-import {
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-} from 'recharts';
+import StarIcon from '@mui/icons-material/Star';
+import RepoIcon from '@mui/icons-material/Book';
+import GroupIcon from '@mui/icons-material/Group';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import TimerIcon from '@mui/icons-material/Timer';
 import CardContent from '@mui/material/CardContent';
 import Card from '@mui/material/Card';
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
+import { useGlobalState } from '../context/GlobalState';
+import Avatar from '@mui/material/Avatar';
 
 export default function Dashboard() {
-  const [taskStats, setTaskStats] = useState({ total: 0, completed: 0 });
-  const [pomodoroCount, setPomodoroCount] = useState(8);
-  const [githubStats, setGithubStats] = useState({ repos: 0, followers: 0 });
-  const [taskTrend, setTaskTrend] = useState([
-    { day: 'Mon', tasks: 2 },
-    { day: 'Tue', tasks: 3 },
-    { day: 'Wed', tasks: 1 },
-    { day: 'Thu', tasks: 4 },
-    { day: 'Fri', tasks: 3 },
-    { day: 'Sat', tasks: 5 },
-    { day: 'Sun', tasks: 2 },
-  ]);
+  const { state } = useGlobalState();
+  const user = state.githubUser;
+  const repos = state.githubRepos;
+  const tasks = state.tasks;
 
-  useEffect(() => {
-    const saved = localStorage.getItem('tasks');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const completed = parsed.filter((t) => t.completed).length;
-      setTaskStats({ total: parsed.length, completed });
-    }
-  }, []);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('tasks');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const completed = parsed.filter((t) => t.completed).length;
-      setTaskStats({ total: parsed.length, completed });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetch('https://api.github.com/users/octocat')
-      .then((res) => res.json())
-      .then((data) =>
-        setGithubStats({ repos: data.public_repos, followers: data.followers })
-      );
-  }, []);
-
-  const todayTasks = 3;
-  const goal = 5;
-  const activeCount = 5;
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed).length;
+  const totalPomodoros = tasks.reduce((sum, t) => sum + t.pomodoroCount, 0);
+  const completedPomodoros = tasks.reduce((sum, t) => sum + t.pomodoroDone, 0);
+  const totalStars = repos.reduce((sum, r) => sum + r.stargazers_count, 0);
 
   return (
-    <Fade in={true} timeout={600}>
-      <Container>
-        <Typography variant='h4' gutterBottom>
-          Welcome to DevInsight
-        </Typography>
-        <Typography variant='body1' mb={4}>
-          Your productivity metrics at a glance
-        </Typography>
+    <Fade in timeout={600}>
+      <Container sx={{ mt: 4 }}>
+        {user && (
+          <Box display='flex' alignItems='center' mb={3}>
+            <Avatar
+              src={user.avatar_url}
+              sx={{ width: 64, height: 64, mr: 2 }}
+            />
+            <Box>
+              <Typography variant='h5'>{user.name || user.login}</Typography>
+              <Typography variant='body2'>{user.bio}</Typography>
+            </Box>
+          </Box>
+        )}
 
-        <Grid container spacing={3} mb={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <CardStat title='Total Tasks' value={taskStats.total} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <CardStat title='Completed Tasks' value={taskStats.completed} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <CardStat title='Pomodoro Sessions' value={pomodoroCount} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <CardStat title='GitHub Repos' value={githubStats.repos} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <CardStat title='GitHub Followers' value={githubStats.followers} />
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={3} mb={3}>
-          <Grid item xs={12} md={6}>
-            <Card sx={{ p: 2, borderRadius: 2, boxShadow: 2, width: 350 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, boxShadow: 2 }}>
               <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  📈 Task Trend This Week
-                </Typography>
-                <ResponsiveContainer width='100%' height={200}>
-                  <LineChart data={taskTrend}>
-                    <CartesianGrid strokeDasharray='3 3' />
-                    <XAxis dataKey='day' />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type='monotone'
-                      dataKey='tasks'
-                      stroke='#8884d8'
-                      activeDot={{ r: 8 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <Box display='flex' alignItems='center' gap={1}>
+                  <RepoIcon color='primary' />
+                  <Typography variant='subtitle1'>Repositories</Typography>
+                </Box>
+                <Typography variant='h5'>{repos.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Card sx={{ height: '89%', p: 2, borderRadius: 2, boxShadow: 2 }}>
+
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, boxShadow: 2 }}>
               <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  🎯 Today's Goal
-                </Typography>
-                <Typography variant='body2'>
-                  {todayTasks} of {goal} tasks completed
-                </Typography>
-                <Box mt={2}>
-                  <LinearProgress
-                    variant='determinate'
-                    value={(todayTasks / goal) * 100}
-                  />
+                <Box display='flex' alignItems='center' gap={1}>
+                  <StarIcon color='warning' />
+                  <Typography variant='subtitle1'>Stars</Typography>
                 </Box>
+                <Typography variant='h5'>{totalStars}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Card
-              sx={{
-                height: '89%',
-                p: 2,
-                borderRadius: 2,
-                boxShadow: 2,
-                width: 320,
-              }}
-            >
+
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, boxShadow: 2 }}>
               <CardContent>
-                <Typography variant='h6' gutterBottom>
-                  🌙 Productivity Streak
-                </Typography>
-                <Typography variant='body2'>
-                  You've been active for {activeCount} consecutive days!
-                </Typography>
-                <Box mt={2} display='flex' gap={1}>
-                  {[...Array(7)].map((_, i) => (
-                    <Box
-                      key={i}
-                      width={30}
-                      height={30}
-                      borderRadius={1}
-                      bgcolor={i < activeCount ? 'primary.main' : 'grey.300'}
-                      flexWrap={1}
-                    />
-                  ))}
+                <Box display='flex' alignItems='center' gap={1}>
+                  <GroupIcon color='success' />
+                  <Typography variant='subtitle1'>Followers</Typography>
                 </Box>
+                <Typography variant='h5'>{user?.followers || 0}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, boxShadow: 2 }}>
+              <CardContent>
+                <Box display='flex' alignItems='center' gap={1}>
+                  <AssignmentTurnedInIcon color='secondary' />
+                  <Typography variant='subtitle1'>Completed Tasks</Typography>
+                </Box>
+                <Typography variant='h5'>
+                  {completedTasks} / {totalTasks}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, boxShadow: 2 }}>
+              <CardContent>
+                <Box display='flex' alignItems='center' gap={1}>
+                  <TimerIcon color='error' />
+                  <Typography variant='subtitle1'>Pomodoros Done</Typography>
+                </Box>
+                <Typography variant='h5'>
+                  {completedPomodoros} / {totalPomodoros}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
