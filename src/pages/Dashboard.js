@@ -5,9 +5,6 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { CardStat } from '../components/CardStat';
 import {
-  PieChart,
-  Pie,
-  Cell,
   Tooltip,
   ResponsiveContainer,
   LineChart,
