@@ -10,7 +10,6 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
-import { useTheme } from '@mui/material/styles';
 
 import { useGlobalState } from '../context/GlobalState';
 
