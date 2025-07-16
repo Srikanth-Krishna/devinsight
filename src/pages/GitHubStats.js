@@ -36,13 +36,11 @@ export default function GitHubStats() {
       setLoading(true);
       setError('');
 
-      // const headers = {
-      //   Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-      // };
+      const headers = {
+        Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+      };
       const userRes = await fetch(`https://api.github.com/users/${user}`, {
-        headers: {
-          Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-        },
+        headers,
       });
       if (!userRes.ok) throw new Error('User not found');
       const userData = await userRes.json();
@@ -50,9 +48,7 @@ export default function GitHubStats() {
       const repoRes = await fetch(
         `https://api.github.com/users/${user}/repos?per_page=100`,
         {
-          headers: {
-            Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
-          },
+          headers,
         }
       );
       const repoData = await repoRes.json();
