@@ -162,7 +162,14 @@ export default function Sidebar({ open, setOpen }) {
               <MenuIcon />
             </IconButton>
             <Typography variant='h5' component='div' sx={{ flexGrow: 1 }}>
-              <span style={{ color: '#0b1957', fontWeight: 600 }}>Dev</span>
+              <span
+                style={{
+                  color: theme.palette.mode === 'dark' ? 'crimson' : '#0b1957',
+                  fontWeight: 600,
+                }}
+              >
+                Dev
+              </span>
               Insight
             </Typography>
             <IconButton color='inherit' onClick={colorMode.toggleColorMode}>
