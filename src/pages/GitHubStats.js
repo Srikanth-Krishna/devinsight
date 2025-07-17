@@ -19,16 +19,19 @@ export default function GitHubStats() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
   const user = state.githubUser;
   const repos = state.githubRepos;
 
-  const fetchLimit = async () => {
-    const reslimit = await fetch('https://api.github.com/rate_limit');
-    const datalimit = await reslimit.json();
-    console.log(datalimit);
-  };
+  // const fetchLimit = async () => {
+  //   const reslimit = await fetch('https://api.github.com/rate_limit', {
+  //     headers: { Authorization: `token ${GITHUB_TOKEN}` },
+  //   });
+  //   const datalimit = await reslimit.json();
+  //   console.log(datalimit);
+  // };
 
-  fetchLimit();
+  // fetchLimit();
 
   const fetchGitHubData = async (user) => {
     if (!user) return;
@@ -37,7 +40,7 @@ export default function GitHubStats() {
       setError('');
 
       const headers = {
-        Authorization: `token ${process.env.REACT_APP_GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
       };
       const userRes = await fetch(`https://api.github.com/users/${user}`, {
         headers,
@@ -54,7 +57,7 @@ export default function GitHubStats() {
       const repoData = await repoRes.json();
 
       dispatch({ type: 'SET_GITHUB_USER', payload: userData });
-      console.log(userData);
+
       dispatch({ type: 'SET_GITHUB_REPOS', payload: repoData });
     } catch (err) {
       setError(err.message);
@@ -69,8 +72,6 @@ export default function GitHubStats() {
     setUsername(e.target.value);
     debouncedFetch(e.target.value.trim());
   };
-
-  console.log(username);
 
   return (
     <Fade in={true} timeout={600}>
